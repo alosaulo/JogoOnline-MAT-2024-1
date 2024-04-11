@@ -24,9 +24,12 @@ public class PlayerController : NetworkBehaviour
         {
             playerCamera.gameObject.SetActive(true);
             characterController = GetComponent<CharacterController>();
+            playerModel.SetActive(false);
         }
         else 
-        { 
+        {
+            playerCamera.gameObject.SetActive(false);
+            //characterController = GetComponent<CharacterController>();
             playerModel.SetActive(true);
         }
     }

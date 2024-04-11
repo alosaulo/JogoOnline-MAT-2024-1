@@ -15,8 +15,10 @@ public class HealthController : NetworkBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (!isLocalPlayer)
+        if (!isLocalPlayer) { 
+            Canvas.SetActive(false);
             return;
+        }
 
         Canvas.SetActive(true);
         healthText.text = health.ToString();
