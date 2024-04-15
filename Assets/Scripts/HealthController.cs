@@ -11,6 +11,7 @@ public class HealthController : NetworkBehaviour
     [SerializeField] Slider slider;
     [SerializeField] TextMeshProUGUI healthText;
     [SerializeField][SyncVar(hook = nameof(HealthValueChanged))] float health;
+    [SerializeField] Animator playerModelAnimator;
 
     // Start is called before the first frame update
     void Start()
@@ -45,8 +46,13 @@ public class HealthController : NetworkBehaviour
         healthText.text = health.ToString();
         if (health <= 0)
         {
-            Debug.Log("Morreu!");
+            playerModelAnimator.SetBool("die", true);
         }
+    }
+
+    public bool isDead() 
+    {
+        return health <= 0;
     }
 
 }

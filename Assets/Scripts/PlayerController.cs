@@ -7,9 +7,13 @@ public class PlayerController : NetworkBehaviour
 {
     CharacterController characterController;
 
+    HealthController healthController;
+
     [SerializeField] Camera playerCamera;
 
     [SerializeField] GameObject playerModel;
+
+    [SerializeField] GameObject weaponModel;
 
     [SerializeField] Animator animatorFPS;
 
@@ -24,13 +28,15 @@ public class PlayerController : NetworkBehaviour
         {
             playerCamera.gameObject.SetActive(true);
             characterController = GetComponent<CharacterController>();
+            healthController = GetComponent<HealthController>();
             playerModel.SetActive(false);
+            weaponModel.SetActive(false);
         }
         else 
         {
             playerCamera.gameObject.SetActive(false);
-            //characterController = GetComponent<CharacterController>();
             playerModel.SetActive(true);
+            weaponModel.SetActive(true);
         }
     }
 
@@ -39,6 +45,11 @@ public class PlayerController : NetworkBehaviour
     {
 
         if (!isLocalPlayer)
+        {
+            return;
+        }
+
+        if (healthController.isDead()) 
         {
             return;
         }
@@ -69,4 +80,5 @@ public class PlayerController : NetworkBehaviour
         characterController.Move(movement * speed * Time.deltaTime);
 
     }
+
 }
