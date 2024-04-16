@@ -11,16 +11,19 @@ public class HealthController : NetworkBehaviour
     [SerializeField] Slider slider;
     [SerializeField] TextMeshProUGUI healthText;
     [SerializeField][SyncVar(hook = nameof(HealthValueChanged))] float health;
-    [SerializeField] Animator playerModelAnimator;
+    [SerializeField] PlayerController playerController;
+    float maxHealth;
+
 
     // Start is called before the first frame update
     void Start()
     {
+        maxHealth = health;
+
         if (!isLocalPlayer) { 
             Canvas.SetActive(false);
             return;
         }
-
         Canvas.SetActive(true);
         healthText.text = health.ToString();
         slider.maxValue = health;
@@ -46,13 +49,25 @@ public class HealthController : NetworkBehaviour
         healthText.text = health.ToString();
         if (health <= 0)
         {
-            playerModelAnimator.SetBool("die", true);
+            playerController.Die();
         }
     }
 
     public bool isDead() 
     {
         return health <= 0;
+    }
+
+    [Command]
+    public void CmdRecover() 
+    {
+        Recover();
+    }
+
+    [Server]
+    void Recover() 
+    {
+        health = maxHealth;
     }
 
 }

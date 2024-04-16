@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using TMPro;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -9,7 +10,13 @@ public class PlayerController : NetworkBehaviour
 
     HealthController healthController;
 
+    [SerializeField] GameObject pnlRespawn;
+
+    [SerializeField] TextMeshProUGUI txtRespawn;
+
     [SerializeField] Camera playerCamera;
+
+    [SerializeField] Camera deathCamera;
 
     [SerializeField] GameObject playerModel;
 
@@ -21,11 +28,17 @@ public class PlayerController : NetworkBehaviour
 
     [SerializeField] float speed;
 
+    [SyncVar]
+    float respawnTime;
+
+    Vector3 posInicial;
+
     // Start is called before the first frame update
     void Start()
     {
         if (isLocalPlayer)
         {
+            posInicial = transform.position;
             playerCamera.gameObject.SetActive(true);
             characterController = GetComponent<CharacterController>();
             healthController = GetComponent<HealthController>();
@@ -51,6 +64,13 @@ public class PlayerController : NetworkBehaviour
 
         if (healthController.isDead()) 
         {
+            respawnTime += Time.deltaTime;
+            txtRespawn.text = respawnTime.ToString();
+            if (respawnTime >= 3) 
+            { 
+                respawnTime = 0;
+                Respawn();
+            }
             return;
         }
 
@@ -79,6 +99,35 @@ public class PlayerController : NetworkBehaviour
 
         characterController.Move(movement * speed * Time.deltaTime);
 
+    }
+
+    public void Die() 
+    {
+        animatorModel.SetBool("die", true);
+        if (isLocalPlayer) 
+        {
+            pnlRespawn.SetActive(true);
+            playerCamera.gameObject.SetActive(false);
+            playerModel.SetActive(true);
+            deathCamera.gameObject.SetActive(true);
+            weaponModel.SetActive(true);
+        }
+    }
+
+    public void Respawn() 
+    {
+        animatorModel.SetBool("die", false);
+        animatorModel.SetTrigger("respawn");
+        healthController.CmdRecover();
+        if (isLocalPlayer)
+        {
+            pnlRespawn.SetActive(false);
+            transform.position = posInicial;
+            playerCamera.gameObject.SetActive(true);
+            playerModel.SetActive(false);
+            deathCamera.gameObject.SetActive(false);
+            weaponModel.SetActive(false);
+        }
     }
 
 }
