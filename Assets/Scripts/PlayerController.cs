@@ -14,6 +14,8 @@ public class PlayerController : NetworkBehaviour
 
     [SerializeField] TextMeshProUGUI txtRespawn;
 
+    [SerializeField] TextMeshProUGUI txtGameTime;
+
     [SerializeField] Camera playerCamera;
 
     [SerializeField] Camera deathCamera;
@@ -31,14 +33,17 @@ public class PlayerController : NetworkBehaviour
     [SyncVar]
     float respawnTime;
 
-    Vector3 posInicial;
+    GameObject[] posInicial;
+
+    RoundController roundController;
 
     // Start is called before the first frame update
     void Start()
     {
         if (isLocalPlayer)
         {
-            posInicial = transform.position;
+            posInicial = GameObject.FindGameObjectsWithTag("Respawn");
+            roundController = FindObjectOfType<RoundController>();
             playerCamera.gameObject.SetActive(true);
             characterController = GetComponent<CharacterController>();
             healthController = GetComponent<HealthController>();
@@ -61,6 +66,8 @@ public class PlayerController : NetworkBehaviour
         {
             return;
         }
+
+        txtGameTime.text = roundController.GetFormatedTime();
 
         if (healthController.isDead()) 
         {
@@ -122,12 +129,15 @@ public class PlayerController : NetworkBehaviour
         if (isLocalPlayer)
         {
             pnlRespawn.SetActive(false);
-            transform.position = posInicial;
+
+            transform.position = posInicial[Random.Range(0, posInicial.Length)].transform.position;
+
             playerCamera.gameObject.SetActive(true);
             playerModel.SetActive(false);
             deathCamera.gameObject.SetActive(false);
             weaponModel.SetActive(false);
         }
+        
     }
 
 }
