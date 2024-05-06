@@ -10,6 +10,10 @@ public class PlayerController : NetworkBehaviour
 
     HealthController healthController;
 
+    [SyncVar(hook = nameof(OnNameChanged))] public string playerName;
+
+    [SerializeField] TextMeshProUGUI txtPlayerName;
+
     [SerializeField] GameObject pnlRespawn;
 
     [SerializeField] TextMeshProUGUI txtRespawn;
@@ -37,6 +41,25 @@ public class PlayerController : NetworkBehaviour
 
     RoundController roundController;
 
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+        LoginManager loginManager = FindObjectOfType<LoginManager>();
+        playerName = loginManager.nicknameInput.text;
+        CmdSetPlayerName(playerName);
+    }
+
+    [Command]
+    private void CmdSetPlayerName(string newName) 
+    { 
+        playerName = newName;
+    }
+
+    private void OnNameChanged(string oldName, string newName) 
+    {
+        txtPlayerName.text = newName;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -55,6 +78,7 @@ public class PlayerController : NetworkBehaviour
             playerCamera.gameObject.SetActive(false);
             playerModel.SetActive(true);
             weaponModel.SetActive(true);
+            txtPlayerName.text = playerName;
         }
     }
 
