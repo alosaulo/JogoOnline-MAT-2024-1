@@ -34,8 +34,7 @@ public class PlayerController : NetworkBehaviour
 
     [SerializeField] float speed;
 
-    [SyncVar]
-    float respawnTime;
+    [SyncVar] float respawnTime;
 
     GameObject[] posInicial;
 
@@ -89,6 +88,12 @@ public class PlayerController : NetworkBehaviour
         if (!isLocalPlayer)
         {
             return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab)) 
+        { 
+            ScoreManager scoreManager = FindObjectOfType<ScoreManager>();
+            scoreManager.GetScores();
         }
 
         txtGameTime.text = roundController.GetFormatedTime();
