@@ -6,11 +6,16 @@ using TMPro;
 
 public class PlayerController : NetworkBehaviour
 {
+
     CharacterController characterController;
 
     HealthController healthController;
 
     [SyncVar(hook = nameof(OnNameChanged))] public string playerName;
+
+    [SerializeField] GameObject pnlScores;
+    
+    [SerializeField] TextMeshProUGUI txtScore;
 
     [SerializeField] TextMeshProUGUI txtPlayerName;
 
@@ -40,10 +45,13 @@ public class PlayerController : NetworkBehaviour
 
     RoundController roundController;
 
+    ScoreManager sm;
+
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
         LoginManager loginManager = FindObjectOfType<LoginManager>();
+        sm = FindObjectOfType<ScoreManager>();
         playerName = loginManager.nicknameInput.text;
         CmdSetPlayerName(playerName);
     }
@@ -90,10 +98,15 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Tab)) 
-        { 
+        if (Input.GetKeyDown(KeyCode.Tab) && !pnlScores.activeSelf)
+        {
+            pnlScores.SetActive(true);
             ScoreManager scoreManager = FindObjectOfType<ScoreManager>();
-            scoreManager.GetScores();
+            txtScore.text = scoreManager.GetScores();
+        }
+        else if (Input.GetKeyDown(KeyCode.Tab) && pnlScores.activeSelf) 
+        {
+            pnlScores.SetActive(false);
         }
 
         txtGameTime.text = roundController.GetFormatedTime();
@@ -158,15 +171,23 @@ public class PlayerController : NetworkBehaviour
         if (isLocalPlayer)
         {
             pnlRespawn.SetActive(false);
-
             transform.position = posInicial[Random.Range(0, posInicial.Length)].transform.position;
-
             playerCamera.gameObject.SetActive(true);
             playerModel.SetActive(false);
             deathCamera.gameObject.SetActive(false);
             weaponModel.SetActive(false);
         }
-        
+    }
+
+    public override void OnStopClient()
+    {
+        base.OnStopClient();
+        sm.CMDRemoveScore(playerName);
+    }
+
+    private void OnApplicationQuit()
+    {
+        OnStopLocalPlayer();
     }
 
 }

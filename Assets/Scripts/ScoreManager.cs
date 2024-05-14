@@ -26,12 +26,16 @@ public class ScoreManager : NetworkBehaviour
         
     }
 
-    public void GetScores() 
+    public string GetScores() 
     {
+        string s = "";
+        
         foreach (var score in Scores)
         {
-            Debug.Log($"{score.Key} - {score.Value.score}/{score.Value.deaths}");
+            s += $"{score.Key} - {score.Value.score}/{score.Value.deaths} \n";
         }
+        
+        return s;
     }
 
     [Command(requiresAuthority = false)]
@@ -39,4 +43,11 @@ public class ScoreManager : NetworkBehaviour
     {
         Scores.Add(a, p);
     }
+
+    [Command(requiresAuthority = false)]
+    public void CMDRemoveScore(string a)
+    {
+        Scores.Remove(a);
+    }
+
 }
