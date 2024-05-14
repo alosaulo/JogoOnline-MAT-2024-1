@@ -3,17 +3,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+public struct Score
+{
+    [SerializeField][SyncVar]public int score;
+
+    [SerializeField][SyncVar]public int deaths;
+}
+
 public class PlayerScore : NetworkBehaviour
 {
 
-    [SerializeField][SyncVar] int score;
-
-    [SerializeField][SyncVar] int deaths;
+    Score pScore = new Score();
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (isLocalPlayer) 
+        {
+            PlayerController pc = GetComponent<PlayerController>();
+            ScoreManager sm = FindObjectOfType<ScoreManager>();
+            sm.CMDAddScore(pc.playerName, pScore);
+        }
     }
 
     // Update is called once per frame
@@ -24,22 +35,22 @@ public class PlayerScore : NetworkBehaviour
 
     public int GetScore() 
     {
-        return score;
+        return pScore.score;
     }
 
     public int GetDeath() 
     { 
-        return deaths;
+        return pScore.deaths;
     }
 
     public void IncrementScore() 
     {
-        score++;
+        pScore.score++;
     }
 
     public void IncrementDeath() 
     {
-        deaths++;
+        pScore.deaths++;
     }
 
 }
