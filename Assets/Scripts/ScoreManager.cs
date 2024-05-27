@@ -1,6 +1,7 @@
 using Mirror;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml;
 using UnityEngine;
 
 public class ScoreManager : NetworkBehaviour
@@ -48,6 +49,25 @@ public class ScoreManager : NetworkBehaviour
     public void CMDRemoveScore(string a)
     {
         Scores.Remove(a);
+    }
+
+    [Server]
+    void UpdateScore(string playerId, int newScore, int newDeaths)
+    {
+        if (Scores.ContainsKey(playerId))
+        {
+            Scores[playerId] = new Score(newScore, newDeaths);
+        }
+        else
+        {
+            Debug.LogWarning("Player ID não encontrado no SyncDictionary.");
+        }
+    }
+
+    [Command(requiresAuthority = false)]
+    public void CmdUpdateScore(string playerId, int newScore, int newDeaths)
+    {
+        UpdateScore(playerId, newScore, newDeaths);
     }
 
 }

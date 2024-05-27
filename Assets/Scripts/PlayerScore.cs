@@ -6,13 +6,20 @@ using UnityEngine;
 
 public struct Score
 {
-    [SerializeField][SyncVar]public int score;
+    [SyncVar] public int score;
+    [SyncVar] public int deaths;
 
-    [SerializeField][SyncVar]public int deaths;
+    public Score(int score, int deaths)
+    {
+        this.score = score;
+        this.deaths = deaths;
+    }
 }
 
 public class PlayerScore : NetworkBehaviour
 {
+    PlayerController pc;
+    ScoreManager sm;
 
     Score pScore = new Score();
 
@@ -21,8 +28,8 @@ public class PlayerScore : NetworkBehaviour
     {
         if (isLocalPlayer) 
         {
-            PlayerController pc = GetComponent<PlayerController>();
-            ScoreManager sm = FindObjectOfType<ScoreManager>();
+            pc = GetComponent<PlayerController>();
+            sm = FindObjectOfType<ScoreManager>();
             sm.CMDAddScore(pc.playerName, pScore);
         }
     }
@@ -46,11 +53,18 @@ public class PlayerScore : NetworkBehaviour
     public void IncrementScore() 
     {
         pScore.score++;
+        UpdateScore();
     }
 
     public void IncrementDeath() 
     {
         pScore.deaths++;
+        UpdateScore();
+    }
+
+    public void UpdateScore() 
+    {
+        sm.CmdUpdateScore(pc.playerName, pScore.score, pScore.deaths);
     }
 
 }

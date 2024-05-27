@@ -12,6 +12,7 @@ public class HealthController : NetworkBehaviour
     [SerializeField] TextMeshProUGUI healthText;
     [SerializeField][SyncVar(hook = nameof(HealthValueChanged))] float health;
     [SerializeField] PlayerController playerController;
+    [SerializeField] PlayerScore playerScore;
     float maxHealth;
 
 
@@ -40,7 +41,8 @@ public class HealthController : NetworkBehaviour
     [Server]
     public void GetDamage(float damage) 
     {
-        health -= damage;
+        if(health >= 0)
+            health -= damage;
     }
 
     void HealthValueChanged(float oldHealth, float newHealth) 
@@ -50,6 +52,7 @@ public class HealthController : NetworkBehaviour
         if (health <= 0)
         {
             playerController.Die();
+            playerScore.IncrementDeath();
         }
     }
 
