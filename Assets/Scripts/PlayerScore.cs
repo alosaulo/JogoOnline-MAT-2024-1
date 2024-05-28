@@ -6,12 +6,14 @@ using UnityEngine;
 
 public struct Score
 {
-    [SyncVar] public int score;
+    [SyncVar] public string nickName;
+    [SyncVar] public int kills;
     [SyncVar] public int deaths;
 
-    public Score(int score, int deaths)
+    public Score(string nickName, int kills, int deaths)
     {
-        this.score = score;
+        this.nickName = nickName;
+        this.kills = kills;
         this.deaths = deaths;
     }
 }
@@ -21,7 +23,7 @@ public class PlayerScore : NetworkBehaviour
     PlayerController pc;
     ScoreManager sm;
 
-    Score pScore = new Score();
+    [SyncVar] Score pScore = new Score();
 
     // Start is called before the first frame update
     void Start()
@@ -30,7 +32,8 @@ public class PlayerScore : NetworkBehaviour
         {
             pc = GetComponent<PlayerController>();
             sm = FindObjectOfType<ScoreManager>();
-            sm.CMDAddScore(pc.playerName, pScore);
+            pScore.nickName = pc.playerName;
+            sm.CMDAddScore(pScore);
         }
     }
 
@@ -42,7 +45,7 @@ public class PlayerScore : NetworkBehaviour
 
     public int GetScore() 
     {
-        return pScore.score;
+        return pScore.kills;
     }
 
     public int GetDeath() 
@@ -52,7 +55,7 @@ public class PlayerScore : NetworkBehaviour
 
     public void IncrementScore() 
     {
-        pScore.score++;
+        pScore.kills++;
         UpdateScore();
     }
 
@@ -64,7 +67,7 @@ public class PlayerScore : NetworkBehaviour
 
     public void UpdateScore() 
     {
-        sm.CmdUpdateScore(pc.playerName, pScore.score, pScore.deaths);
+        sm.CmdUpdateScore(pc.playerName, pScore.kills, pScore.deaths);
     }
 
 }

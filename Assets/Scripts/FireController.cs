@@ -7,6 +7,7 @@ public class FireController : NetworkBehaviour
 {
     [SerializeField] GameObject PlayerCam;
     [SerializeField] LayerMask PlayerMask;
+    [SerializeField] PlayerScore playerScore;
 
     // Start is called before the first frame update
     void Start()
@@ -14,43 +15,45 @@ public class FireController : NetworkBehaviour
         
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Fire1")) 
+        if (Input.GetButtonDown("Fire1"))
         {
-            Debug.DrawRay(PlayerCam.transform.position, 
+            Debug.DrawRay(PlayerCam.transform.position,
                 PlayerCam.transform.forward,
                 Color.red,
                 1);
+
             if (Physics.Raycast(PlayerCam.transform.position,
                 PlayerCam.transform.forward,
-                out RaycastHit hit, PlayerMask)) 
+                out RaycastHit hit, PlayerMask))
             {
-                if (hit.collider.TryGetComponent<HealthController>(out HealthController playerHealth)) 
+                if (hit.collider.TryGetComponent<HealthController>(out HealthController playerHealth))
                 {
-                    if (isServer) 
-                    {
-                        ServerHit(25, playerHealth);
-                        return;
-                    }
-
-                    CmdHit(25, playerHealth);
+                    CmdHit(25, playerHealth.netId);
                 }
             }
         }
     }
 
     [Command]
-    void CmdHit(float damage, HealthController playerHealth) 
-    { 
-        ServerHit(damage, playerHealth);
+    void CmdHit(float damage, uint targetNetId)
+    {
+        if (NetworkServer.spawned.TryGetValue(targetNetId, out NetworkIdentity targetIdentity) && targetIdentity != null)
+        {
+            HealthController playerHealth = targetIdentity.GetComponent<HealthController>();
+            if (playerHealth != null)
+            {
+                ServerHit(damage, playerHealth, connectionToClient);
+            }
+        }
     }
 
     [Server]
-    void ServerHit(float damage, HealthController playerHealth) 
+    void ServerHit(float damage, HealthController playerHealth, NetworkConnectionToClient attackerConnection)
     {
         playerHealth.GetDamage(damage);
     }
+
 
 }

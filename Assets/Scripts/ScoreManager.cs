@@ -6,14 +6,8 @@ using UnityEngine;
 
 public class ScoreManager : NetworkBehaviour
 {
-    private ScoreManager scoreManager;
 
-    public SyncDictionary<string, Score> Scores = new SyncDictionary<string, Score>();
-
-    private void Awake()
-    {
-        scoreManager = GameObject.FindObjectOfType<ScoreManager>();
-    }
+    public SyncList<Score> Scores = new SyncList<Score>();
 
     // Start is called before the first frame update
     void Start()
@@ -33,35 +27,31 @@ public class ScoreManager : NetworkBehaviour
         
         foreach (var score in Scores)
         {
-            s += $"{score.Key} - {score.Value.score}/{score.Value.deaths} \n";
+            s += $"{score.nickName} - {score.kills}/{score.deaths} \n";
         }
         
         return s;
     }
 
     [Command(requiresAuthority = false)]
-    public void CMDAddScore(string a, Score p) 
+    public void CMDAddScore(Score p) 
     {
-        Scores.Add(a, p);
+        Scores.Add(p);
     }
 
     [Command(requiresAuthority = false)]
-    public void CMDRemoveScore(string a)
+    public void CMDRemoveScore(string nickName)
     {
-        Scores.Remove(a);
+        Score score = Scores.Find(x => x.nickName == nickName);
+        Scores.Remove(score);
     }
 
     [Server]
-    void UpdateScore(string playerId, int newScore, int newDeaths)
+    void UpdateScore(string nickName, int newScore, int newDeaths)
     {
-        if (Scores.ContainsKey(playerId))
-        {
-            Scores[playerId] = new Score(newScore, newDeaths);
-        }
-        else
-        {
-            Debug.LogWarning("Player ID não encontrado no SyncDictionary.");
-        }
+        Score score = Scores.Find(x => x.nickName == nickName);
+        score.kills = newScore;
+        score.deaths = newDeaths;
     }
 
     [Command(requiresAuthority = false)]

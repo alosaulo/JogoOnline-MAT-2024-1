@@ -52,7 +52,6 @@ public class HealthController : NetworkBehaviour
         if (health <= 0)
         {
             playerController.Die();
-            playerScore.IncrementDeath();
         }
     }
 
